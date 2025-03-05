@@ -6,17 +6,26 @@ const clearCanvasButton = document.getElementById('clear-canvas');
 
 let isDrawing = false;
 
-// Set initial styles
-ctx.strokeStyle = colorPicker.value;
-ctx.lineWidth = brushSize.value;
-ctx.lineCap = 'round';
+// Function to resize canvas dynamically
+function resizeCanvas() {
+  canvas.width = window.innerWidth * 0.9; // 90% of screen width
+  canvas.height = window.innerHeight * 0.7; // 70% of screen height
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = colorPicker.value;
+  ctx.lineWidth = brushSize.value;
+}
 
-// Event Listeners
+// Resize canvas on load and window resize
+window.addEventListener('load', resizeCanvas);
+window.addEventListener('resize', resizeCanvas);
+
+// Event Listeners for mouse
 canvas.addEventListener('mousedown', startDrawing);
 canvas.addEventListener('mousemove', draw);
 canvas.addEventListener('mouseup', stopDrawing);
 canvas.addEventListener('mouseout', stopDrawing);
 
+// Event Listeners for touch
 canvas.addEventListener('touchstart', startDrawing);
 canvas.addEventListener('touchmove', draw);
 canvas.addEventListener('touchend', stopDrawing);
@@ -42,19 +51,14 @@ function startDrawing(e) {
 function draw(e) {
   if (!isDrawing) return;
 
-  // Get mouse or touch position
-  const x = e.clientX || e.touches[0].clientX;
-  const y = e.clientY || e.touches[0].clientY;
+  // Handle touch or mouse coordinates
+  const x = (e.clientX || e.touches[0].clientX) - canvas.getBoundingClientRect().left;
+  const y = (e.clientY || e.touches[0].clientY) - canvas.getBoundingClientRect().top;
 
-  // Adjust for canvas offset
-  const rect = canvas.getBoundingClientRect();
-  const offsetX = x - rect.left;
-  const offsetY = y - rect.top;
-
-  ctx.lineTo(offsetX, offsetY);
+  ctx.lineTo(x, y);
   ctx.stroke();
   ctx.beginPath();
-  ctx.moveTo(offsetX, offsetY);
+  ctx.moveTo(x, y);
 }
 
 function stopDrawing() {
